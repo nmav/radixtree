@@ -11,7 +11,7 @@
 #include "radix.h"
 
 #ifndef LSB_FIRST
-static inline int count_bits(char *k1, char *k2, int count)
+static inline int count_bits(const char *k1, const char *k2, int count)
 {
     int mask = 128;
     while (~(*k1 ^ *k2) & mask && --count) {
@@ -25,7 +25,7 @@ static inline int count_bits(char *k1, char *k2, int count)
     return count;
 }
 #else
-static inline int count_bits(char *k1, char *k2, int count)
+static inline int count_bits(const char *k1, const char *k2, int count)
 {
     int mask = 1;
     while (~(*k1 ^ *k2) & mask && --count) {
@@ -40,7 +40,7 @@ static inline int count_bits(char *k1, char *k2, int count)
 }
 #endif
 
-static int count_common_bits(char *k1, char *k2, int max)
+static int count_common_bits(const char *k1, const char *k2, int max)
 {
     int count = max;
     // XXX SIMD-ify?
@@ -76,7 +76,7 @@ static inline int shift(int i)
 }
 #endif
 
-static inline int get_bit_at(char *k, int i)
+static inline int get_bit_at(const char *k, int i)
 {
     int bytes = i >> 3;
     int mask = shift(i);
@@ -207,12 +207,12 @@ static int insert_internal(rxt_node *newleaf, rxt_node *n)
     return -1; // this should never happen
 }
 
-int rxt_put(char *key, void *value, rxt_node *n)
+int rxt_put(const char *key, void *value, rxt_node *n)
 {
     return rxt_put2(key, strlen(key)+1, value, n);
 }
 
-int rxt_put2(void *key, int ksize, void *value, rxt_node *n)
+int rxt_put2(const void *key, int ksize, void *value, rxt_node *n)
 {
 #define NEWLEAF(nl, k, ksize, v) \
     nl = malloc(sizeof(rxt_node)); \
@@ -277,7 +277,7 @@ int rxt_put2(void *key, int ksize, void *value, rxt_node *n)
 #undef NEWLEAF
 }
 
-static rxt_node* get_internal(void *key, int ksize, rxt_node *root)
+static rxt_node* get_internal(const void *key, int ksize, rxt_node *root)
 {
     if (!root) return NULL;
 
@@ -335,12 +335,12 @@ static void *delete_internal(rxt_node *n, rxt_node *sibling)
     return v;
 }
 
-void* rxt_delete(char *key, rxt_node *root)
+void* rxt_delete(const char *key, rxt_node *root)
 {
 	return rxt_delete2(key, strlen(key)+1, root);
 }
 
-void* rxt_delete2(void *key, int ksize, rxt_node *root)
+void* rxt_delete2(const void *key, int ksize, rxt_node *root)
 {
     rxt_node *parent, *grandparent;
     rxt_node *n = get_internal(key, ksize, root);
@@ -417,19 +417,19 @@ void rxt_free(rxt_node *root)
     free(root);
 }
 
-void* rxt_get(char *key, rxt_node *root)
+void* rxt_get(const char *key, rxt_node *root)
 {
     return rxt_get2(key, strlen(key)+1, root);
 }
 
-void* rxt_get2(void *key, int ksize, rxt_node *root)
+void* rxt_get2(const void *key, int ksize, rxt_node *root)
 {
     rxt_node *n = get_internal(key, ksize, root);
     if (!n) return NULL;
     return n->value;
 }
 
-rxt_node* rxt_get_node(void *key, int ksize, rxt_node *root)
+rxt_node* rxt_get_node(const void *key, int ksize, rxt_node *root)
 {
     return get_internal(key, ksize, root);
 }
