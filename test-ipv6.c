@@ -61,47 +61,12 @@ static void print_tree(rxt_node * root)
     printf("\n");
 }
 
-static char *reverse(char *c)
-{
-    int len = strlen(c), i;
-    char *str = malloc(len + 1);
-    for (i = 0; i < len; i++)
-	str[i] = c[len - i - 1];
-    str[len] = '\0';
-    return str;
-}
-
 static int count_comparisons(rxt_node * root)
 {
     if (!root || root->color)
 	return 0;
     return root->pos + count_comparisons(root->left) +
 	count_comparisons(root->right);
-}
-
-static void print_in_order(rxt_node * root)
-{
-    if (!root)
-	return;
-    if (root->color) {
-	if (2 == root->color)
-	    root = root->value;
-	printf("%s: %s\n", root->key, (char *) root->value);
-	return;
-    }
-    print_in_order(root->left);
-    print_in_order(root->right);
-}
-
-static void print_value(char *key, rxt_node * root)
-{
-    char ip[64];
-    char *value = rxt_get(key, root);
-    if (value) {
-	inet_ntop(AF_INET6, key, ip, sizeof(ip));
-	printf("%s: %s\n", ip, value);
-    } else
-	printf("%s: NOT FOUND\n", key);
 }
 
 static int insert(const char *addr, unsigned prefix, rxt_node * root,
@@ -241,7 +206,6 @@ int main(int argc, char **argv)
     /* tree recover test finished */
 
     printf("---------------\n");
-    //print_in_order(&root);
     printf("COMPARISONS: %d\n", count_comparisons(root));
 
     rxt_free(root);
