@@ -345,7 +345,7 @@ void* rxt_delete2(const void *key, int ksize, rxt_node *root)
     rxt_node *parent, *grandparent;
     rxt_node *n = get_internal(key, ksize, root);
     void *v;
-    char *newkey;
+    char *newkey = NULL;
     if (!n) return NULL; // nonexistent
 
     v = n->value;
@@ -364,8 +364,9 @@ void* rxt_delete2(const void *key, int ksize, rxt_node *root)
             parent->value = NULL;
             parent->color = 0;
             parent->pos = 0;
-        } else
-            printf("something very wrong when removing w/o gp!\n");
+        } else {
+            fprintf(stderr, "something very wrong when removing w/o gp!\n");
+        }
 
         free(n);
         return v;
@@ -381,8 +382,9 @@ void* rxt_delete2(const void *key, int ksize, rxt_node *root)
         } else if (parent->right == n) {
             grandparent->left = parent->left;
             parent->left->parent = grandparent;
-        } else
-            printf("something very wrong: removing grandparent->left\n");
+        } else {
+            fprintf(stderr, "something very wrong: removing grandparent->left\n");
+        }
     } else if (grandparent->right == n->parent) {
         newkey = grandparent->left->key;
         if (parent->left == n ) {
@@ -392,9 +394,9 @@ void* rxt_delete2(const void *key, int ksize, rxt_node *root)
             grandparent->right = parent->left;
             parent->left->parent = grandparent;
         } else
-            printf("something very wrong: removing grandparent->right\n");
+            fprintf(stderr, "something very wrong: removing grandparent->right\n");
     } else
-        printf("something very wrong: grandparent does not possess child\n");
+        fprintf(stderr, "something very wrong: grandparent does not possess child\n");
 
     reset_key(n->key, newkey, grandparent);
     parent->left = NULL;
