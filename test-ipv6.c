@@ -123,6 +123,15 @@ static void *get(const char *addr, unsigned prefix, rxt_node * root)
     return rxt_get2(in.s6_addr, prefix / 8, root);
 }
 
+static rxt_node *get_node(const char *addr, unsigned prefix, rxt_node * root)
+{
+    struct in6_addr in;
+
+    if (inet_pton(AF_INET6, addr, &in) != 1)
+	exit(1);
+    return rxt_get_node(in.s6_addr, prefix / 8, root);
+}
+
 struct addresses_st {
     const char *address;
     unsigned prefix;
@@ -135,8 +144,16 @@ static struct addresses_st addresses[] = {
      .prefix = 128},
     {.address = "fc44:a988:a40:9600::1",
      .prefix = 128},
+    {.address = "fc44:a988:a40:9600:0000:ffd2::1",
+     .prefix = 128},
+    {.address = "fc44:a988:a4::",
+     .prefix = 40},
+    {.address = "fc44::",
+     .prefix = 16},
     {.address = "fd97:16e4:f54e:5fc6:d101:09d2:f2f8:bb29",
      .prefix = 128},
+    {.address = "fc44:a988:a40:9600:0000:ffd2::1",
+     .prefix = 96},
     {.address = "fc9c:6c27:9cf9:cf80:a0df:93ad:f131:ed76",
      .prefix = 128},
     {.address = "fc0c:94fd:dabe:49aa:752e:aa76:eccc:b33b",
@@ -159,7 +176,7 @@ static struct addresses_st addresses[] = {
 
 int main(int argc, char **argv)
 {
-    rxt_node *root = rxt_init();
+    rxt_node *root = rxt_init(), *n;
     unsigned i;
     const char *v;
 
@@ -191,6 +208,37 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
     }
+
+    /* verify that tree recovery works */
+    n = get_node("fc44::", 16, root);
+    if (n == NULL) {
+	    fprintf(stderr, "cannot find %s/%d\n", addresses[i].address,
+		    addresses[i].prefix);
+	    exit(1);
+    }
+
+    n = get_node("fc44:a988:a4::", 40, n);
+    if (n == NULL) {
+	    fprintf(stderr, "cannot find %s/%d\n", addresses[i].address,
+		    addresses[i].prefix);
+	    exit(1);
+    }
+
+    n = get_node("fc44:a988:a40:9600:0000:ffd2::1", 96, n);
+    if (n == NULL) {
+	    fprintf(stderr, "cannot find %s/%d\n", addresses[i].address,
+		    addresses[i].prefix);
+	    exit(1);
+    }
+
+    n = get_node("fc44:a988:a40:9600:0000:ffd2::1", 128, n);
+    if (n == NULL) {
+	    fprintf(stderr, "cannot find %s/%d\n", addresses[i].address,
+		    addresses[i].prefix);
+	    exit(1);
+    }
+
+    /* tree recover test finished */
 
     printf("---------------\n");
     //print_in_order(&root);
