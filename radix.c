@@ -429,6 +429,11 @@ void* rxt_get2(void *key, int ksize, rxt_node *root)
     return n->value;
 }
 
+rxt_node* rxt_get_node(void *key, int ksize, rxt_node *root)
+{
+    return get_internal(key, ksize, root);
+}
+
 rxt_node *rxt_init()
 {
     rxt_node *root = malloc(sizeof(rxt_node));

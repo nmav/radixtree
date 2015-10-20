@@ -27,6 +27,10 @@ int rxt_put2(void *key, int ksize, void *value, rxt_node *n);
 void* rxt_get2(void*, int ksize, rxt_node*);
 void* rxt_delete2(void*, int ksize, rxt_node*);
 
+/* This allows fast recovery of data when a parent
+ * of them was requested before */
+rxt_node* rxt_get_node(void*, int ksize, rxt_node*);
+
 void rxt_free(rxt_node *);
 rxt_node *rxt_init();
 
