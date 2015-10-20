@@ -3,7 +3,7 @@
 
 all: test test-ipv6
 
-CFLAGS=-g -DRADIXTREE_DEBUG -DLSB_FIRST
+CFLAGS=-O2 -Wall -g -DRADIXTREE_DEBUG -DLSB_FIRST
 COMMON=radix.c radix.h
 test: $(COMMON) test.c
 	gcc $(CFLAGS) radix.c test.c -o $@
